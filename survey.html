@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sleep Survey</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--world style -->
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --main-blue: #3B82F6;
+      --main-yellow: #FFD43B;
+      --bg-card: #F0F4F8;
+      --bg-btn: #3B82F6;
+      --btn-hover: #2563EB;
+      --card-radius: 16px;
+      --font-main: 'Baloo 2', cursive, Arial, sans-serif;
+      --option-bg: #F7F9FA;
+      --option-border: #E5E7EB;
+      --option-active: #3B82F6;
+      --option-active-bg: #E0ECFF;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      font-family: var(--font-main);
+      background: linear-gradient(120deg, #eaf6ff 0%, #fef9f4 100%);
+      color: #2D3A5E;
+      position: relative;
+      overflow-x: hidden;
+    }
+    /* Background dreamy elements */
+    .bg-deco {
+      position: fixed;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .star {
+      color: #ffe066;
+      filter: drop-shadow(0 0 8px #fff4bcaa);
+      opacity: 0.85;
+      animation: twinkle 3s infinite;
+      font-size: 1.8rem;
+    }
+    .star.s1 { top: 6%; left: 8%; font-size: 2.2rem;}
+    .star.s2 { top: 13%; left: 93%; font-size: 1.3rem;}
+    .star.s3 { top: 81%; left: 19%; font-size: 1.7rem;}
+    .star.s4 { top: 73%; left: 89%; font-size: 1.5rem;}
+    .star.s5 { top: 54%; left: 96%; font-size: 1.3rem;}
+    .star.s6 { top: 92%; left: 77%; font-size: 2.2rem;}
+    .star.s7 { top: 17%; left: 14%; font-size: 1.3rem;}
+    .star.s8 { top: 24%; left: 52%; font-size: 2.0rem;}
+    .star.s9 { top: 88%; left: 48%; font-size: 1.6rem;}
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.9; }
+      50% { opacity: 0.4; }
+    }
+    .moon {
+      top: 3.5%; left: 46%;
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 60% 40%, #ffe066 70%, #fdee9b 100%);
+      box-shadow: 0 0 30px 8px #ffe06670, 0 0 40px 16px #fffbe4aa;
+      animation: moonGlow 3.5s ease-in-out infinite;
+    }
+    @keyframes moonGlow {
+      0%,100% { box-shadow: 0 0 13px 5px #ffe06688, 0 0 32px 16px #ffe06633;}
+      50% { box-shadow: 0 0 33px 18px #fffbe4, 0 0 54px 24px #ffd70088;}
+    }
+    .cloud {
+      opacity: 0.8;
+      animation: cloudMove 25s linear infinite;
+      filter: blur(0.4px) drop-shadow(0 0 8px #fff);
+    }
+    .cloud.c1 { top: 11%; left: 13%; width: 65px; animation-delay: 0s;}
+    .cloud.c2 { top: 21%; left: 67%; width: 41px; animation-delay: 2.4s;}
+    .cloud.c3 { top: 78%; left: 26%; width: 76px; animation-delay: 6.5s;}
+    .cloud.c4 { top: 89%; left: 72%; width: 44px; animation-delay: 7.2s;}
+    .cloud.c5 { top: 35%; left: 44%; width: 63px; animation-delay: 3s;}
+    .cloud.c6 { top: 64%; left: 87%; width: 34px; animation-delay: 9.3s;}
+    @keyframes cloudMove {
+      0% { transform: translateX(0);}
+      50% { transform: translateX(18px);}
+      100% { transform: translateX(0);}
+    }
+    .sleep-hat {
+      position: fixed; top: 22%; left: 77%;
+      width: 48px; z-index: 0;
+      filter: drop-shadow(0 0 7px #bdbfff44);
+      opacity: 0.85;
+      animation: hatFloat 5.5s infinite;
+    }
+    @keyframes hatFloat {
+      0%,100% { transform: translateY(0) rotate(-10deg);}
+      50% { transform: translateY(-12px) rotate(6deg);}
+    }
+    .bg-sheep {
+      position: fixed;
+      bottom: 3%; left: 11%;
+      width: 55px; z-index: 0;
+      filter: drop-shadow(0 0 9px #fff7);
+      opacity: 0.93;
+      animation: sheepJump 8s infinite;
+    }
+    @keyframes sheepJump {
+      0%,100% { transform: translateY(0);}
+      14% { transform: translateY(-20px);}
+      18% { transform: translateY(0);}
+      22% { transform: translateY(-11px);}
+      25% { transform: translateY(0);}
+    }
+    /* ----- Main survey UI ----- */
+    .main-container {
+      max-width: 520px;
+      margin: 36px auto 0 auto;
+      background: white;
+      border-radius: var(--card-radius);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+      padding: 32px 12px 30px 12px;
+      z-index: 1;
+      position: relative;
+    }
+
+    .survey-title {
+      text-align: center;
+      color: var(--main-blue);
+      font-size: 2.0rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      margin-top: 0;
+    }
+    .survey-progress {
+      width: 95%;
+      height: 9px;
+      background: #E5EAF3;
+      border-radius: 8px;
+      margin: 0 auto 28px auto;
+      overflow: hidden;
+      box-shadow: 0 1.5px 5px #bbdefb20;
+    }
+    .survey-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #3B82F6, #FFD43B 80%);
+      border-radius: 8px;
+      transition: width .35s;
+    }
+    .question-card {
+      background: var(--bg-card);
+      border-radius: var(--card-radius);
+      box-shadow: 0 2px 10px #cbd5e0aa;
+      padding: 30px 10px 22px 10px;
+      margin-bottom: 24px;
+      font-size: 1.23rem;
+      color: #2D3A5E;
+      text-align: center;
+      letter-spacing: .5px;
+      font-family: var(--font-main);
+    }
+    .question-emoji {
+      font-size: 2.1rem;
+      display: block;
+      margin-bottom: 4px;
+      margin-top: 0;
+    }
+    .option-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin: 17px 0 15px 0;
+      align-items: stretch;
+    }
+    .option-btn {
+      font-family: var(--font-main);
+      font-size: 1.11rem;
+      background: var(--option-bg);
+      border: 2px solid var(--option-border);
+      border-radius: 11px;
+      padding: 14px 7px;
+      text-align: left;
+      color: #27486F;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 1.5px 7px #e0ecff25;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      outline: none;
+      transition: border .17s, background .19s, color .13s;
+    }
+    .option-btn.active, .option-btn:active, .option-btn:focus {
+      border: 2.2px solid var(--option-active);
+      background: var(--option-active-bg);
+      color: var(--main-blue);
+      font-weight: 600;
+      box-shadow: 0 2.5px 14px #3B82F633;
+    }
+    .survey-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .survey-btn {
+      background: var(--bg-btn);
+      color: white;
+      font-size: 1.1rem;
+      padding: 12px 33px;
+      border-radius: 11px;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-main);
+      font-weight: 600;
+      letter-spacing: 1px;
+      box-shadow: 0 1.5px 7px #3B82F644;
+      transition: background 0.18s, box-shadow .15s;
+    }
+    .survey-btn[disabled] {
+      opacity: 0.45;
+      cursor: default;
+      background: #93c5fd;
+    }
+    .survey-btn:hover:not([disabled]) {
+      background: var(--btn-hover);
+      box-shadow: 0 2.5px 17px #3B82F688;
+    }
+    .survey-footer-tip {
+      margin: 31px auto 6px auto;
+      text-align: center;
+      color: #a3a6b1;
+      font-size: 0.97rem;
+      font-family: var(--font-main);
+      letter-spacing: .2px;
+    }
+    @media (max-width: 650px) {
+      .main-container {padding: 13px 1.5vw 12px 1.5vw;}
+      .survey-title {font-size: 1.3rem;}
+      .question-card {font-size: 1.1rem; padding: 16px 2vw;}
+      .option-btn {font-size: 0.98rem; padding: 10px 4px;}
+      .survey-btn {font-size: 1.01rem; padding: 9px 15px;}
+      .bg-sheep { width: 40px;}
+      .cloud { width: 32px !important;}
+      .moon { width: 28px; height: 28px;}
+    }
+  </style>
+</head>
+<body>
+  <!-- BG Start -->
+  <div class="bg-deco star s1">★</div>
+  <div class="bg-deco star s2">★</div>
+  <div class="bg-deco star s3">★</div>
+  <div class="bg-deco star s4">★</div>
+  <div class="bg-deco star s5">★</div>
+  <div class="bg-deco star s6">★</div>
+  <div class="bg-deco star s7">★</div>
+  <div class="bg-deco star s8">★</div>
+  <div class="bg-deco star s9">★</div>
+  <div class="bg-deco moon"></div>
+  <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2601.svg" class="bg-deco cloud c1" alt="cloud"/>
+  <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2601.svg" class="bg-deco cloud c2" alt="cloud"/>
+  <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2601.svg" class="bg-deco cloud c3" alt="cloud"/>
+  <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2601.svg" class="bg-deco cloud c4" alt="cloud"/>
+  <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2601.svg" class="bg-deco cloud c5" alt="cloud"/>
+  <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2601.svg" class="bg-deco cloud c6" alt="cloud"/>
+  <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3a9.svg" class="sleep-hat" alt="sleep hat"/>
+  <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f411.svg" class="bg-sheep" alt="sheep"/>
+  <!-- BG End -->
+
+  <div class="main-container">
+    <h2 class="survey-title">🦉 Sleep Survey</h2>
+    <div class="survey-progress">
+      <div class="survey-progress-bar" id="progressBar" style="width: 0%;"></div>
+    </div>
+    <div id="questionArea"></div>
+    <div class="survey-nav">
+      <button class="survey-btn" id="prevBtn">← Previous</button>
+      <button class="survey-btn" id="nextBtn">Next →</button>
+    </div>
+    <div class="survey-footer-tip">All questions are about your sleep this week. Your answers help make your sleep better!</div>
+  </div>
+  <script>
+    // questions
+    const questions = [
+          { emoji: "🐻", text: "In the past week, did you wake up in the middle of the night, shout, or have a scary dream?" },
+          { emoji: "🌛", text: "In the past week, did you wake up several times at night? Did it take a while to fall back asleep?" },
+          { emoji: "🧸", text: "At bedtime, did you sometimes not feel like going to sleep and want to play or do Other things?" },
+          { emoji: "🕒", text: "About how many hours did you sleep each night this week? Sometimes you might not sleep enough and feel tired in the morning." },
+          { emoji: "🐘", text: "While sleeping, did you ever feel like you couldn't breathe, or did someone say you were snoring or gasping?" },
+          { emoji: "🌞", text: "During the day, in class or while playing, did you ever feel so sleepy that you wanted to doze off or lie down?" },
+          { emoji: "🐱", text: "Have you ever felt a little scared to sleep alone, like being afraid of the dark or being by yourself?" },
+          { emoji: "🦉", text: "After you lie in bed, did it take you a long time to fall asleep? For example, did you have many thoughts, or couldn't your body settle down?" }
+        ];
+    // options
+    const options = [
+      { text: "No, never", value: 0, emoji: "✅" },
+      { text: "Occasionally", value: 1, emoji: "🟡" },
+      { text: "Often", value: 2, emoji: "🟠" },
+      { text: "Almost always", value: 3, emoji: "🔴" }
+    ];
+    let answers = Array(questions.length).fill(null);
+    let current = 0;
+
+    function renderQuestion(idx) {
+      const q = questions[idx];
+      let html = `
+        <div class="question-card">
+          <span class="question-emoji">${q.emoji}</span>
+          <span>${q.text}</span>
+          <div class="option-list">
+            ${options.map((op, i) => `
+              <button class="option-btn${answers[idx] === i ? ' active' : ''}" onclick="chooseOption(${i})">${op.emoji} ${op.text}</button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+      document.getElementById('questionArea').innerHTML = html;
+      // buttons
+      document.getElementById('prevBtn').disabled = idx === 0;
+      document.getElementById('nextBtn').textContent = idx === questions.length - 1 ? "Submit" : "Next →";
+      document.getElementById('nextBtn').disabled = answers[idx] === null;
+      // progress bar
+      document.getElementById('progressBar').style.width = ((idx) / questions.length * 100 + (answers[idx] !== null ? 100 / questions.length : 0)) + "%";
+    }
+    window.chooseOption = function(i) {
+      answers[current] = i;
+      renderQuestion(current);
+    }
+    document.getElementById('prevBtn').onclick = function() {
+      if (current > 0) { current--; renderQuestion(current);}
+    };
+    document.getElementById('nextBtn').onclick = function() {
+      if (answers[current] === null) return;
+      if (current < questions.length - 1) {
+        current++; renderQuestion(current);
+      } else {
+      // save answers to session storage
+      const surveyResults = {};
+      answers.forEach((ans, idx) => {
+        surveyResults['q' + (idx + 1)] = ans;
+      });
+      sessionStorage.setItem('sleepSurveyData', JSON.stringify(surveyResults));
+      // skip
+      location.href = "analysis.html";
+    }
+    };
+    renderQuestion(0);
+  </script>
+</body>
+</html>

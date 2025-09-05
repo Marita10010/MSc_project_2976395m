@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SleepStar Grouped Puzzle Wall</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {margin:0; padding:0; font-family:'Baloo 2',cursive; background:linear-gradient(120deg,#fff8ee 50%,#e7f5fb 100%);} 
+    .dashboard-container {max-width:1100px; margin:34px auto 64px auto; padding:0 10px;} 
+    .dashboard-title {text-align:center;font-size:2.2rem;font-weight:800;color:#229488;margin-bottom:13px;} 
+    .dashboard-note { 
+      background:linear-gradient(90deg,#fff9e8 60%,#e7faf6 100%); 
+      color:#7a4c00;font-size:1.09rem;border-radius:13px;padding:15px 23px 15px 18px; 
+      box-shadow:0 2px 14px #ffe6c111;margin:0 auto 36px auto;max-width:770px;line-height:1.6;font-weight:600; 
+      border-left:7px solid #ffd43b80; 
+    } 
+    .dim-group {margin-bottom: 42px; border-radius:38px; background:linear-gradient(100deg,#f8fff6 50%,#f7faff 100%); box-shadow:0 2px 22px #a3ffe822; padding:18px 8px 20px 8px; position:relative;} 
+    .dim-label {font-size:1.25rem; font-weight:800; color:#ff9d3d; margin-bottom:16px; display:flex;align-items:center;gap:14px;} 
+    .dim-label .emoji {font-size:2.1rem;} 
+    .puzzle-row {display:flex;gap:22px;flex-wrap:wrap;justify-content:center;} 
+    .puzzle-piece { 
+      position:relative; width:135px;height:135px;background:#fff;border-radius:24px 36px 22px 36px/34px 26px 36px 24px; 
+      box-shadow:0 3px 18px #ffdba122;transition:transform .15s, box-shadow .13s; 
+      cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center; 
+      font-size:1.06rem;font-weight:700;border:3px solid transparent;overflow:visible;z-index:1;outline:none; 
+      user-select:none; 
+    } 
+    .puzzle-piece:hover,.puzzle-piece.active {transform:scale(1.07) rotate(-2deg);box-shadow:0 8px 32px #ffdba122;border-color:#ffd43b55;z-index:4;} 
+    .piece-emoji {font-size:2.2rem;margin-bottom:4px;filter:drop-shadow(0 2px 8px #ffd43b44);} 
+    .piece-title {font-size:0.99rem;font-weight:700;color:#3e527b;text-align:center;line-height:1.14;margin-bottom:5px;} 
+    .piece-impact {font-size:1.07rem;font-weight:700;margin-bottom:2px;color:#ffb91d;} 
+    .piece-tip {display:none;position:absolute;bottom:112%;left:50%;transform:translateX(-50%); 
+      min-width:160px;max-width:260px;background:linear-gradient(115deg,#fff8e7 60%,#eafffa 100%); 
+      color:#33a479;font-size:1.01rem;font-weight:600;border-radius:13px;padding:14px 18px 13px 18px; 
+      box-shadow:0 6px 30px #ffdba173;z-index:9;text-align:center;pointer-events:none;opacity:0;transition:opacity .24s; 
+      animation:tipPop .38s; 
+    } 
+    @keyframes tipPop {from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}} 
+    .puzzle-piece.active .piece-tip {display:block;opacity:1;pointer-events:auto;} 
+    @media(max-width:700px){.puzzle-piece{width:99vw;max-width:290px;height:90px;min-width:120px;}} 
+    @media(max-width:800px){.puzzle-row{gap:13px;}} 
+    @media(max-width:550px){.puzzle-row{gap:9px;}} 
+
+    /* Back button */
+    .back-wrap{max-width:1100px;margin: 6px auto 36px auto; padding:0 10px; display:flex; justify-content:center;} 
+    .back-btn{ 
+      background:#3B82F6; color:#fff; border:none; border-radius:14px; 
+      font-size:1.05rem; font-weight:800; padding:12px 18px; cursor:pointer; 
+      box-shadow:0 6px 20px #3b82f622; transition: transform .12s ease; 
+    } 
+    .back-btn:hover{ transform: translateY(-1px); } 
+    .back-btn:active{ transform: translateY(0); } 
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <div class="dashboard-title">🧩 Sleep Habits Puzzle Garden</div>
+    <div class="dashboard-note">
+      🌱 All of these sleep habits are very common for kids and families! Each group is like a little puzzle garden—explore together and help every animal friend become happier and healthier!
+    </div>
+    <div id="wallArea"></div>
+  </div>
+
+  <!-- Bottom Back button -->
+  <div class="back-wrap">
+    <button class="back-btn" type="button" aria-label="Go back"
+      onclick="(history.length>1)?history.back():location.href='explore.html'">← Back</button>
+  </div>
+
+  <script>
+    //emoji
+    const GROUPS = [
+      {key:'Parasomnias',      label:'Parasomnias', emoji:'🦉',  color:'#ffe7f7'},
+      {key:'NightWakings',     label:'Night Wakings', emoji:'⏰',color:'#e6eeff'},
+      {key:'BedtimeResistance',label:'Bedtime Resistance',emoji:'🦦',color:'#fff9e6'},
+      {key:'SleepOnsetDelay',  label:'Sleep Onset Delay',emoji:'🦥',color:'#f0fff2'},
+      {key:'SleepDuration',    label:'Sleep Duration',emoji:'🐻',color:'#fff7e7'},
+      {key:'SleepAnxiety',     label:'Sleep Anxiety',emoji:'🐱',color:'#fff2e8'},
+      {key:'SleepDisorderedBreathing',label:'Sleep Disordered Breathing',emoji:'🐘',color:'#f4f9ff'},
+      {key:'DaytimeSleepiness',label:'Daytime Sleepiness',emoji:'🌞',color:'#f5ffe6'}
+    ];
+    // Sleep habits data
+    const HABITS = [
+      // Parasomnias
+      {dim:'Parasomnias',label:'Wake up at night and scream',abs_coef:1.54,advice:"Try relaxing breathing before bed to help you feel safe and calm all night."},
+      {dim:'Parasomnias',label:'Bedwetting',abs_coef:1.01,advice:"Use the bathroom before bed to help your body rest comfortably."},
+      {dim:'Parasomnias',label:'Sleepwalking',abs_coef:0.83,advice:"Keep your room tidy so you can move safely, even during sleep."},
+      {dim:'Parasomnias',label:'Nightmares',abs_coef:0.80,advice:"Share your dreams with your family and talk about what made you feel scared."},
+      {dim:'Parasomnias',label:'Talk during sleep',abs_coef:0.76,advice:"Tell a happy story with your family before bed to invite peaceful dreams."},
+      {dim:'Parasomnias',label:'Grind teeth at night',abs_coef:0.74,advice:"Try gentle jaw relaxation exercises before sleep."},
+      {dim:'Parasomnias',label:'Sweat a lot at night',abs_coef:0.68,advice:"Wear light pajamas and keep your room cool for a more comfortable sleep."},
+      // Night Wakings
+      {dim:'NightWakings',label:'Wake multiple times at night',abs_coef:0.50,advice:"Create a bedtime routine so your body knows it's time for sleep."},
+      {dim:'NightWakings',label:'Wake early in the morning',abs_coef:0.41,advice:"Try to keep regular sleep and wake times, even on weekends."},
+      {dim:'NightWakings',label:'Wake up to go to bathroom',abs_coef:0.36,advice:"Limit drinks before bed and always use the toilet before sleeping."},
+      {dim:'NightWakings',label:"Can't fall back asleep after waking",abs_coef:0.33,advice:"If you wake up, take a few slow breaths and think of something pleasant."},
+      {dim:'NightWakings',label:'Wake up for no reason',abs_coef:0.28,advice:"Keep your bedroom quiet and cozy for better sleep through the night."},
+      // Bedtime Resistance
+      {dim:'BedtimeResistance',label:'Go to bed anytime',abs_coef:0.28,advice:"Make a bedtime schedule and stick to it, even if you feel wide awake."},
+      {dim:'BedtimeResistance',label:'Refuse to go to bed',abs_coef:0.22,advice:"Try to make bedtime fun with stories or calming music."},
+      {dim:'BedtimeResistance',label:'Ask for things to delay sleep',abs_coef:0.20,advice:"Prepare what you need for sleep in advance, like water or a favorite toy."},
+      {dim:'BedtimeResistance',label:'Complain about going to bed',abs_coef:0.19,advice:"Talk with your family about why sleep is important for energy and focus."},
+      // Sleep Onset Delay
+      {dim:'SleepOnsetDelay',label:'Take long to fall asleep',abs_coef:0.22,advice:"Have a relaxing bedtime routine and avoid screens before bed."},
+      {dim:'SleepOnsetDelay',label:'Restless in bed before sleep',abs_coef:0.21,advice:"Try gentle stretching or reading a book to help your body settle."},
+      {dim:'SleepOnsetDelay',label:'Need a parent present to fall asleep',abs_coef:0.18,advice:"Practice falling asleep alone with a comforting object nearby."},
+      {dim:'SleepOnsetDelay',label:'Think too much before sleeping',abs_coef:0.17,advice:"Write down or talk about your thoughts before bedtime to clear your mind."},
+      // Sleep Duration
+      {dim:'SleepDuration',label:'Sleep little at night',abs_coef:0.27,advice:"Make sure you get enough hours of sleep for your age to help your brain grow."},
+      {dim:'SleepDuration',label:'Go to bed too late',abs_coef:0.23,advice:"Move your bedtime a little earlier to wake up feeling fresh."},
+      {dim:'SleepDuration',label:'Get up too early',abs_coef:0.21,advice:"Keep the room dark and quiet in the morning to help your body sleep longer."},
+      {dim:'SleepDuration',label:'Wake up tired',abs_coef:0.20,advice:"Make sleep a priority so you can feel more awake and focused during the day."},
+      // Sleep Anxiety
+      {dim:'SleepAnxiety',label:'Afraid to sleep alone',abs_coef:0.16,advice:"Use a soft night light or favorite toy to feel safe in your room."},
+      {dim:'SleepAnxiety',label:'Worry about sleeping',abs_coef:0.15,advice:"Talk to your family about your worries before bed for comfort."},
+      {dim:'SleepAnxiety',label:'Check with parents often before sleeping',abs_coef:0.13,advice:"Make a goodnight ritual to help you feel calm and ready for sleep."},
+      {dim:'SleepAnxiety',label:'Feel unsafe or uncomfortable at bedtime',abs_coef:0.11,advice:"Make your bedroom a cozy and welcoming place to rest."},
+      // Sleep Disordered Breathing
+      {dim:'SleepDisorderedBreathing',label:'Gasps for air during sleep',abs_coef:0.27,advice:"Tell your family if you ever have trouble breathing during sleep."},
+      {dim:'SleepDisorderedBreathing',label:'Snore loudly at night',abs_coef:0.23,advice:"Try sleeping on your side to help you breathe more easily."},
+      {dim:'SleepDisorderedBreathing',label:'Breath pauses during sleep',abs_coef:0.19,advice:"Let your parents know if you sometimes stop breathing while asleep."},
+      // Daytime Sleepiness
+      {dim:'DaytimeSleepiness',label:'Difficult to wake up',abs_coef:0.27,advice:"Keep a regular sleep schedule so mornings feel easier."},
+      {dim:'DaytimeSleepiness',label:'Feel sleepy during the day',abs_coef:0.26,advice:"Make sleep a healthy habit to help you stay focused and energetic in school."}
+    ];
+    // Function to get impact emoji based on absolute coefficient
+    function getImpactEmoji(abs_coef){
+      if(abs_coef>=0.8) return '🔥';
+      if(abs_coef>=0.25) return '⭐';
+      return '💧';
+    }
+    // Create the puzzle wall
+    const wallArea=document.getElementById('wallArea');
+    GROUPS.forEach(g=>{
+      const group = document.createElement('div');
+      group.className = 'dim-group';
+      group.style.background = `linear-gradient(110deg,${g.color} 60%,#fff 100%)`;
+      group.innerHTML = `<div class="dim-label"><span class="emoji">${g.emoji}</span>${g.label}</div>
+        <div class="puzzle-row"></div>`;
+      const row = group.querySelector('.puzzle-row');
+      HABITS.filter(h=>h.dim===g.key).forEach(h=>{
+        const piece=document.createElement('div');
+        piece.className='puzzle-piece';
+        piece.innerHTML = `
+          <div class="piece-emoji">${g.emoji}</div>
+          <div class="piece-title">${h.label}</div>
+          <div class="piece-impact">${getImpactEmoji(h.abs_coef)}</div>
+          <div class="piece-tip">${h.advice}</div>`;
+        piece.addEventListener('click',function(e){
+          document.querySelectorAll('.puzzle-piece.active').forEach(p=>p.classList.remove('active'));
+          piece.classList.add('active');
+          e.stopPropagation();
+        });
+        piece.addEventListener('blur',function(){piece.classList.remove('active');});
+        row.appendChild(piece);
+      });
+      wallArea.appendChild(group);
+    });
+    // Add click listener
+    document.body.addEventListener('click',function(e){
+      if(!e.target.classList.contains('puzzle-piece') && !e.target.closest('.puzzle-piece')){
+        document.querySelectorAll('.puzzle-piece.active').forEach(p=>p.classList.remove('active'));
+      }
+    },true);
+  </script>
+</body>
+</html>

@@ -1,0 +1,483 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Explore SleepStar</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin:0; padding:0;
+      font-family:'Baloo 2',cursive;
+      min-height:100vh;
+      position: relative;
+      overflow-x: hidden;
+      background: linear-gradient(120deg,#eaf6ff,#fef9f4);
+    }
+    .bg-mountain {
+      position: fixed;
+      left: 0; bottom: 0; right: 0;
+      width: 100vw;
+      height: 80vh;
+      object-fit: cover;
+      z-index: 0;
+      pointer-events: none;
+      user-select: none;
+    }
+    .bg-animal {
+      position: fixed;
+      left: 0; bottom: 0; right: 0;
+      width: 310px;
+      height: auto;
+      max-width: 32vw;
+      min-width: 60px;
+      z-index: 1;
+      pointer-events: none;
+      user-select: none;
+      filter: drop-shadow(0 4px 32px #fffbe944);
+      transition: width 0.3s, left 0.3s, bottom 0.3s;
+    }
+    @media (max-width: 700px) {
+      .bg-animal { width: 80px; left: 2vw;}
+      .bg-mountain { height: 28vh;}
+    }
+    @media (max-width: 480px) {
+      .bg-animal { width: 36vw; left: 3vw;}
+    }
+    .main-container {
+      position: relative;
+      z-index: 10;
+      max-width: 950px;
+      margin: 52px auto 0 auto;
+      padding: 0 12px 38px 12px;
+    }
+    .explore-title {
+      color: #4C5A7E;
+      text-align: center;
+      font-size: 2.3rem;
+      font-weight: 800;
+      margin-bottom: 32px;
+      letter-spacing: 2px;
+      text-shadow: 0 1px 8px #f0fff7a2;
+      display: flex; justify-content: center; gap: 12px; align-items: flex-end;
+      line-height: 1.15;
+    }
+    .explore-flex {
+      display: flex;
+      gap: 38px;
+      align-items: flex-start;
+    }
+    @media (max-width: 880px) {
+      .explore-flex { flex-direction: column; gap: 24px;}
+    }
+    .tasks-panel {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 6px 24px #14bf9622;
+      padding: 32px 20px 24px 20px;
+      width: 50vw;
+      min-width: 210px;
+      max-width: 530px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+      transition: width 0.3s;
+    }
+    @media (max-width: 880px) {
+      .tasks-panel { width: 100%; max-width: 100%; }
+    }
+    .tasks-title {
+      color: #3B82F6;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      text-align: center;
+      letter-spacing: 1.2px;
+    }
+    /* card */
+    .task-item {
+      background: #f7fafc;
+      border-radius: 11px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 8px #cbd5e022;
+      font-size: 1.07rem;
+      position: relative;
+      transition: background 0.2s;
+      perspective: 900px;
+      min-height: 66px;
+      height: 76px;
+      padding: 0;
+      overflow: visible;
+    }
+    .flip-inner {
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s cubic-bezier(.77,0,.18,1.11);
+      transform-style: preserve-3d;
+      position: relative;
+    }
+    .task-item.flipped .flip-inner {
+      transform: rotateY(180deg);
+    }
+    .flip-front, .flip-back {
+      width: 100%;
+      height: 76px;
+      position: absolute;
+      left: 0; top: 0;
+      backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 12px 12px 16px;
+      border-radius: 11px;
+      font-size: 1.07rem;
+      box-sizing: border-box;
+      background: #f7fafc;
+    }
+    .flip-back {
+      background: #FFF7ED;
+      border: 2px solid #FFD43B;
+      color: #ca8a04;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      transform: rotateY(180deg);
+      font-size: 1.15rem;
+      box-shadow: 0 1px 10px #FFD43B24;
+      padding: 0 14px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      line-height: 1.4;
+    }
+    .task-item .emoji { font-size: 1.5rem; }
+    .task-item .desc { flex:1;}
+    .btn-check {
+      background: #FFD43B;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      padding: 7px 15px 7px 13px;
+      cursor: pointer;
+      margin-left: 8px;
+      box-shadow: 0 1px 5px #FFD43B22;
+      transition: background .2s;
+    }
+    .btn-check:active { background: #ffb600; }
+    .modules-panel {
+      flex:1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .module-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 6px 24px #3b82f622;
+      padding: 36px 20px 32px 32px;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      cursor: pointer;
+      transition: transform 0.16s, box-shadow 0.2s;
+      min-height: 100px;
+      position: relative;
+      z-index: 1;
+    }
+    .module-card:hover { transform: translateY(-5px) scale(1.025); box-shadow: 0 12px 28px #3b82f64b; }
+    .module-emoji {
+      font-size: 2.7rem;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+    .module-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .module-title {
+      color: #FFD43B;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 1.1px;
+      margin-bottom: 3px;
+    }
+    .module-desc {
+      color: #4B5563;
+      font-size: 0.98rem;
+    }
+    .bg-emoji {
+      position: fixed;
+      opacity: 0.15;
+      user-select: none;
+      pointer-events: none;
+      font-size: 2.7rem;
+      z-index: 0;
+    }
+    .bg-e1 { left: 9vw;  top: 8vh;}
+    .bg-e2 { right: 10vw; top: 12vh;}
+    .bg-e3 { left: 16vw; bottom: 9vh;}
+    .bg-e4 { right: 18vw; bottom: 17vh;}
+    .bg-e5 { left: 55vw; top: 91vh;}
+  </style>
+</head>
+<body>
+  <img src="pictures/explore (1).png" alt="mountain bg" class="bg-mountain">
+
+  <img src="pictures/explore (2).png" alt="cute animals" class="bg-animal">
+  <!-- emoji -->
+  <div class="bg-emoji bg-e1">🦉</div>
+  <div class="bg-emoji bg-e2">🌸</div>
+  <div class="bg-emoji bg-e3">⛵</div>
+  <div class="bg-emoji bg-e4">🌼</div>
+  <div class="bg-emoji bg-e5">🐢</div>
+  <!-- main container-->
+  <div class="main-container">
+    <div class="explore-title">🌱 Explore SleepStar</div>
+    <div class="explore-flex">
+      <!--tasks-panel -->
+      <div class="tasks-panel">
+        <div class="tasks-title">✅  Today's  Tasks </div>
+        <div id="tasksList"></div>
+      </div>
+      <!--modules-panel -->
+      <div class="modules-panel">
+        <div class="module-card" onclick="location.href='knowledge.html'">
+          <span class="module-emoji">🧩</span>
+          <div class="module-content">
+            <div class="module-title">Puzzle Wall</div>
+            <div class="module-desc">Explore all sleep habits like a puzzle garden and discover tips to boost your attention!</div>
+          </div>
+        </div>
+      <div class="module-card" onclick="location.href='attention.html'">
+        <span class="module-emoji">🏅</span>
+        <div class="module-content">
+          <div class="module-title">Attention Trainer</div>
+          <div class="module-desc">See how your sleep habits help boost your attention!</div>
+        </div>
+      </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+
+  //Alias mapping for dimension keys
+  const dimensionKeyAliases = {
+    q1:'Parasomnias', q2:'NightWakings', q3:'BedtimeResistance', q4:'SleepDuration',
+    q5:'SleepDisorderedBreathing', q6:'DaytimeSleepiness', q7:'SleepAnxiety', q8:'SleepOnsetDelay',
+    Parasomnias:'Parasomnias', NightWakings:'NightWakings', BedtimeResistance:'BedtimeResistance',
+    SleepOnsetDelay:'SleepOnsetDelay', SleepDuration:'SleepDuration', SleepAnxiety:'SleepAnxiety',
+    SleepDisorderedBreathing:'SleepDisorderedBreathing', DaytimeSleepiness:'DaytimeSleepiness',
+    "Night Terrors / Scary Dreams":"Parasomnias", "Unusual Night Behaviors":"Parasomnias",
+    "Night Awakenings":"NightWakings", "Bedtime Resistance":"BedtimeResistance",
+    "Sleep Onset Delay":"SleepOnsetDelay", "Short Sleep Duration":"SleepDuration",
+    "Sleep Duration":"SleepDuration", "Sleep-Related Anxiety":"SleepAnxiety",
+    "Breathing Issues in Sleep":"SleepDisorderedBreathing", "Breathing Issues":"SleepDisorderedBreathing",
+    "Daytime Sleepiness":"DaytimeSleepiness",
+    Sleepiness: 'DaytimeSleepiness'
+};
+  function normalizeDimKey(name){ return dimensionKeyAliases[name] || name; }
+
+    // dimensionSuggestions
+    const dimensionSuggestions = {
+      Parasomnias: [
+        "Take a few deep breaths before bed to help your body relax.",
+        "Share happy things from your day with your family at night.",
+        "Try a soft pillow to make sleep more comfortable.",
+        "Listen to gentle music before sleeping.",
+        "Help your family make your bedroom cozy and safe together."
+      ],
+      NightWakings: [
+        "Drink less water before bedtime to wake up less at night.",
+        "Soak your feet in warm water before bed to help your body relax.",
+        "If you wake up at night, close your eyes and take three deep breaths.",
+        "Make a regular bedtime routine with your family.",
+        "If you wake up, gently pull your blanket back on and lie down again."
+      ],
+      BedtimeResistance: [
+        "Have a bedtime story time with your family every night.",
+        "Get your favorite stuffed toy ready for sleep before bed.",
+        "Plan your playtime and quiet time with your family in the evening.",
+        "Lie quietly in bed after getting in, no more playing.",
+        "Let your family know when you are ready for bed."
+      ],
+      SleepOnsetDelay: [
+        "Take three deep breaths in bed to help your body calm down.",
+        "Turn off all electronics before going to bed.",
+        "Listen to soft music before sleeping.",
+        "Close your eyes and count little animals until you fall asleep.",
+        "Go to bed at the same time every night."
+      ],
+      SleepDuration: [
+        "Be active during the day.",
+        "Get ready for bed a little earlier at night.",
+        "Make a set bedtime schedule with your family.",
+        "Keep nap time under 30 minutes.",
+        "Turn off the lights on time every night."
+      ],
+      SleepAnxiety: [
+        "Cuddle your favorite stuffed toy when sleeping.",
+        "Share the happiest thing from your day with your family before bed.",
+        "Pick out a night light you like.",
+        "Listen to a bedtime story at night.",
+        "Create a special 'good night' routine with your parents."
+      ],
+      SleepDisorderedBreathing: [
+        "Try sleeping on your side or back to help you breathe better.",
+        "Ask your family to help you find a comfy sleeping position.",
+        "Keep your room fresh and airy.",
+        "Tell your family if your nose is stuffy.",
+        "Don't use a blanket that's too thick at night."
+      ],
+      DaytimeSleepiness: [
+        "Eat a healthy breakfast every morning.",
+        "Move and play during the day, and go to bed early at night.",
+        "Keep nap time short, no more than 30 minutes.",
+        "Open the curtains and let sunlight in after you wake up.",
+        "Drink water during the day to stay energized."
+      ]
+    };
+
+    // finish praiseList
+    const praiseList = [
+      "Great job! 🌟 You did it!",
+      "Awesome! 🎉 Well done!",
+      "Super star! 🦄",
+      "Fantastic! 😍 You’re amazing!",
+      "Bravo! 🥳 Keep going!",
+      "Yay! 👏 Proud of you!",
+      "High five! ✋",
+      "Wonderful work! 🌈"
+    ];
+
+    function getTopDimensions(scoresObj){
+  let raw = [];
+  try{
+    raw = Object.entries(scoresObj||{}).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
+  }catch(e){ raw = []; }
+
+  const out = [];
+  const allDims = Object.keys(dimensionSuggestions || {});
+
+  for (const k of raw) {
+    const nk = normalizeDimKey(k);
+    if (nk && allDims.includes(nk) && !out.includes(nk)) out.push(nk);
+    if (out.length >= 3) break;
+  }
+  //if less than 3, fill with other available dimensions
+  for (const d of allDims) {
+    if (out.length >= 3) break;
+    if (!out.includes(d)) out.push(d);
+  }
+  return out.slice(0,3);
+}function getRandomTaskFromDimension(dim) {
+      const pool = dimensionSuggestions[dim];
+      if (!pool || pool.length === 0) return "";
+      const idx = Math.floor(Math.random()*pool.length);
+      return pool[idx];
+    }
+    function getPraise(){
+      return praiseList[Math.floor(Math.random()*praiseList.length)];
+    }
+    function renderTasks(){
+  const tasksList = document.getElementById('tasksList');
+  if (!tasksList) return;
+  tasksList.innerHTML = "";
+  let scores = null;
+  try {
+    scores = JSON.parse(sessionStorage.getItem("dimensionScores") || localStorage.getItem("dimensionScores"));
+  } catch(e){ scores = null; }
+
+  const allDims = Object.keys(dimensionSuggestions || {});
+  let dims = [];
+
+  if (scores && typeof scores === "object") {
+    dims = getTopDimensions(scores);
+  } else {
+    // random pick 3 different dimensions
+    while (dims.length < 3) {
+      const pick = allDims[Math.floor(Math.random() * allDims.length)];
+      if (!dims.includes(pick)) dims.push(pick);
+    }
+  }
+
+  const picked = new Set();
+
+// First try to use the selected dimensions
+  for (const dim0 of dims) {
+    if (tasksList.children.length >= 3) break;
+    let dim = normalizeDimKey(dim0);
+    let taskText = getRandomTaskFromDimension(dim);
+
+    if (!taskText) {
+      const fallback = allDims.find(d => !picked.has(d) && (dimensionSuggestions[d] || []).length);
+      if (fallback) {
+        dim = fallback;
+        taskText = getRandomTaskFromDimension(dim);
+      }
+    }
+
+    if (!taskText) continue;
+    picked.add(dim);
+
+    const item = document.createElement("div");
+    item.className = "task-item";
+    item.innerHTML = `
+      <div class="flip-inner">
+        <div class="flip-front">
+          <span class="emoji">💡</span>
+          <span class="desc">${taskText}</span>
+          <button class="btn-check">Check</button>
+        </div>
+        <div class="flip-back">
+          ${getPraise()}
+        </div>
+      </div>
+    `;
+    const btn = item.querySelector('.btn-check');
+    btn.onclick = function(){
+      item.classList.add('flipped');
+      setTimeout(()=>{btn.style.display = "none";},420);
+    };
+    tasksList.appendChild(item);
+  }
+
+  let safety = 50;
+  while (tasksList.children.length < 3 && safety-- > 0) {
+    const d = allDims[Math.floor(Math.random() * allDims.length)];
+    if (picked.has(d)) continue;
+    const t = getRandomTaskFromDimension(d);
+    if (!t) continue;
+    picked.add(d);
+
+    const item = document.createElement("div");
+    item.className = "task-item";
+    item.innerHTML = `
+      <div class="flip-inner">
+        <div class="flip-front">
+          <span class="emoji">💡</span>
+          <span class="desc">${t}</span>
+          <button class="btn-check">Check</button>
+        </div>
+        <div class="flip-back">
+          ${getPraise()}
+        </div>
+      </div>
+    `;
+    const btn = item.querySelector('.btn-check');
+    btn.onclick = function(){
+      item.classList.add('flipped');
+      setTimeout(()=>{btn.style.display = "none";},420);
+    };
+    tasksList.appendChild(item);
+  }
+}
+renderTasks();
+</script>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sleep Habits → Attention Benefit (Top-6)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <style>
+    :root{
+      --blue:#457b9d; --teal:#229488; --sun:#ffb923;
+      --bg1:#f7fcfe; --bg2:#fff2d6; --muted:#70747d;
+    }
+    *{box-sizing:border-box}
+    body{
+      background: linear-gradient(120deg,var(--bg1) 65%, var(--bg2) 100%);
+      font-family: 'Baloo 2', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin:0; padding:18px; color:#23323f;
+    }
+    .wrap{ max-width: 1200px; margin: 0 auto; }
+    .card{
+      background:#fff; border-radius:22px; padding:22px 18px;
+      box-shadow: 0 10px 36px #7ddff533, 0 2px 10px #ffd6ad40;
+    }
+    .title{
+      display:flex; align-items:flex-end; justify-content:center; gap:10px;
+      color: var(--blue); font-weight:900; font-size:2rem; letter-spacing:1px;
+      text-shadow: 0 1px 10px #e0fff5b6; margin: 8px 0 6px 0;
+    }
+    .note{
+      text-align:center; color:var(--teal); background:#f5fafd;
+      border-radius:12px; padding:10px 12px; margin:8px 0 14px 0; font-size:1.05rem;
+    }
+    .chart{
+      width:100%; height:360px; background:#f8fcfd; border-radius:16px;
+      box-shadow: 0 2px 14px #b7f9fa22; margin:6px auto 14px auto;
+    }
+    #sliders{ display:grid; grid-template-columns: repeat(2,minmax(420px,1fr)); gap:12px; }
+    .sg{
+      background:#f7fafc; border-radius:14px; padding:12px 14px 10px 14px;
+      box-shadow: 0 1px 8px #c8e9ff19;
+    }
+    .lab{
+      display:flex; align-items:center; gap:8px; color:#4478b2; font-weight:800; margin-bottom:6px;
+      letter-spacing:0.2px;
+    }
+    .em{ font-size:1.35rem }
+    input[type="range"]{
+      -webkit-appearance:none; appearance:none; width:100%; height:12px; border-radius:999px;
+      background: linear-gradient(90deg,#dbeafe, #a7d3ff);
+      outline:none; margin: 6px 0 6px 0;
+    }
+    input[type="range"]::-webkit-slider-thumb{
+      -webkit-appearance:none; width:22px; height:22px; border-radius:50%;
+      background:#74b4ff; box-shadow:0 4px 10px #8dc1ff88; border:2px solid #fff; cursor:pointer; transition:.08s;
+    }
+    input[type="range"]:active::-webkit-slider-thumb{ transform:scale(1.06) }
+    .val{ color:var(--sun); font-weight:900 }
+    .tips{
+      margin-top:8px; text-align:center; color:#d16e25; background:#fff7e5; border-radius:10px;
+      padding:10px 12px; font-weight:800;
+    }
+    .foot{
+      margin-top:12px; text-align:center; color:var(--muted); background:#e8f9ff; border-radius:10px;
+      padding:10px 12px; font-style:italic;
+    }
+    @media (max-width:740px){
+      .title{font-size:1.6rem}
+      .chart{height:300px}
+      #sliders{grid-template-columns: 1fr}
+    }
+
+    /* Bottom Back button */
+    .back-wrap{max-width:1200px;margin:14px auto 24px auto; padding:0 10px; display:flex; justify-content:center;}
+    .back-btn{
+      background: linear-gradient(90deg, #22c55e, #14b8a6);
+      color:#fff; border:none; border-radius:999px;
+      font-size:1.05rem; font-weight:800; padding:12px 20px; cursor:pointer;
+      box-shadow: 0 6px 18px #14b8a633, 0 2px 6px #22c55e22;
+      transition: transform .12s ease, filter .2s ease;
+    }
+    .back-btn:hover{ transform: translateY(-1px); filter: brightness(1.05); }
+    .back-btn:active{ transform: translateY(0); filter: brightness(0.98); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="title">🛏️ Sleep Habits → <span style="color:#ffb923;">Attention Benefit</span></div>
+      <div class="note">
+        Let's find out how to make your attention super strong! Move the sliders to add more good sleep habits — watch the bars grow as your attention improves.
+      </div>
+
+      <div id="chart" class="chart"></div>
+      <div id="sliders"></div>
+
+      <div class="tips" id="tipsBox">💡 Start from zero, slide right — more good habits mean better attention!</div>
+      <div class="foot">🌱 Everyone has habits to work on. Start with one, and soon your focus will blossom!</div>
+    </div>
+  </div>
+
+  <!-- Bottom Back button -->
+  <div class="back-wrap">
+    <button class="back-btn" type="button" aria-label="Go back" onclick="(history.length>1)?history.back():location.href='explore.html'">← Back</button>
+  </div>
+
+  <script>
+    const VARS = [
+      "mw3_wake_negative",
+      "sb1_sleep_little",
+      "sb18_wake_alarmed",
+      "mw5_wake_difficult",
+      "mw6_slow_alert",
+      "sb9_change_bed"
+    ];
+    const COEF = [
+      0.15345609291434067,
+      0.12118727398766388,
+      0.009765747676388005,
+      0.005846567760503132,
+      0.0006217889218788589,
+      0.005437435439129758
+    ];
+    const LABELS = {
+      mw3_wake_negative:  "😊 Positive morning mood",
+      sb1_sleep_little:   "⏳ Enough sleep time",
+      sb18_wake_alarmed:  "🌙 Calm through the night",
+      mw5_wake_difficult: "⏰ Easy to wake up",
+      mw6_slow_alert:     "🚀 Gets alert quickly",
+      sb9_change_bed:     "🛏️ Sleeps in same bed"
+    };
+    const HELPS = {
+      mw3_wake_negative:  "Cheerful mornings support better attention.",
+      sb1_sleep_little:   "Sufficient sleep boosts attention.",
+      sb18_wake_alarmed:  "Calm, uninterrupted nights steady focus.",
+      mw5_wake_difficult: "Waking easily keeps mornings smooth.",
+      mw6_slow_alert:     "Getting alert quickly helps learning.",
+      sb9_change_bed:     "A consistent bed supports restful sleep."
+    };
+    let sliders = VARS.map(_ => 0.00);
+    function contributions(values){
+      return values.map((v, i) => Math.max(0, COEF[i] * v));
+    }
+    function buildSliders(){
+      const host = document.getElementById('sliders');
+      host.innerHTML = '';
+      VARS.forEach((k, i) => {
+        const sg = document.createElement('div'); sg.className = 'sg';
+        sg.innerHTML = `
+          <div class="lab"><span class="em">${LABELS[k].slice(0,2)}</span>${LABELS[k].slice(2)}</div>
+          <input type="range" min="0" max="3" step="0.01" value="${sliders[i]}" oninput="onSlide(${i}, this.value)" />
+          <div class="val">Level: <span id="v-${i}">${sliders[i].toFixed(2)}</span></div>
+          <div style="color:#d16e25;font-weight:800;margin-top:4px;">${HELPS[k]}</div>
+        `;
+        host.appendChild(sg);
+      });
+    }
+    function onSlide(i, val){
+      sliders[i] = +val;
+      document.getElementById(`v-${i}`).textContent = (+val).toFixed(2);
+      updateAll(true);
+    }
+    const chart = echarts.init(document.getElementById('chart'));
+    chart.setOption({
+      animationDurationUpdate: 200,
+      grid:{top:28,left:100,right:18,bottom:68},
+      xAxis:{
+        type:'category',
+        data: VARS.map(k => LABELS[k]),
+        axisLabel:{interval:0,rotate:14,fontWeight:800,fontSize:14,color:'#4367af'}
+      },
+      yAxis:{
+        type:'value',
+        name:'Attention Contribution',
+        nameTextStyle:{fontWeight:800,fontSize:14,color:'#229488'},
+        axisLabel:{fontSize:13,fontWeight:800},
+        splitLine:{show:true}
+      },
+      series:[{
+        type:'bar',
+        data: contributions(sliders),
+        barWidth: 40,
+        label:{
+          show:true, position:'top',
+          formatter: p => (p.value||0).toFixed(3),
+          fontWeight:900, fontSize:14, color:'#ffb923'
+        },
+        itemStyle:{
+          color:(p)=>{
+            const top = "#9fd6ff";
+            const bottom = "#f0f8ff";
+            return {type:'linear', x:0,y:0,x2:0,y2:1, colorStops:[{offset:0,color:top},{offset:1,color:bottom}]};
+          },
+          borderRadius:12
+        }
+      }],
+      tooltip:{
+        trigger:'item',
+        formatter: (p)=>{
+          const k = VARS[p.dataIndex];
+          const c = COEF[p.dataIndex];
+          const v = sliders[p.dataIndex];
+          return `
+            <b>${LABELS[k]}</b><br/>
+            Weight: <b>${c.toFixed(4)}</b><br/>
+            Level: <b>${v.toFixed(2)}</b> (higher is better)<br/>
+            Benefit = weight × level = <b>${(c*v).toFixed(3)}</b>
+          `;
+        }
+      }
+    });
+    function updateAll(){
+      const contrib = contributions(sliders);
+      let maxIdx = 0, maxAbs = Math.abs(contrib[0]||0);
+      for(let i=1;i<contrib.length;i++){
+        const a = Math.abs(contrib[i]||0);
+        if(a>maxAbs){maxAbs=a; maxIdx=i;}
+      }
+      const k = VARS[maxIdx];
+      document.getElementById('tipsBox').textContent =
+        (maxAbs===0 ? '💡 Start from zero, slide right — more good habits mean better attention!' :
+         `💡 Highest positive contribution: ${LABELS[k]}`);
+      chart.setOption({ series:[{ data: contrib }] }, false, true);
+//Merge-in: pastel colorful bars + star badge labels (liked palette)
+chart.setOption({
+  series: [{
+    label: {
+      show: true,
+      position: 'top',
+      distance: 6,
+      formatter: function (p) {
+        var max = Math.max.apply(null, contrib) || 0;
+        var v = p.value || 0;
+        if (max <= 0) return "{badge|　}";
+        var r = v / max;
+        var n = Math.max(1, Math.round(r * 5)); // 1–5 stars
+        var stars = "⭐".repeat(n);
+        return "{medal|🏅}{badge|" + stars + "}";
+      },
+      rich: {
+        medal: { padding:[2,2,2,0], fontSize:16, lineHeight:20 },
+        badge: {
+          padding:[2,8],
+          borderRadius: 12,
+          backgroundColor: "#fff9db",
+          borderColor: "#ffd666",
+          borderWidth: 1,
+          shadowColor: "rgba(255, 217, 102, 0.6)",
+          shadowBlur: 6,
+          color: "#ffb923",
+          fontSize: 16,
+          fontWeight: 700,
+          lineHeight: 20
+        }
+      }
+    },
+    itemStyle: {
+      borderRadius: 12,
+      color: function (params) {
+        const cList = [
+          "#b7ffc6","#ffe099","#9fd6ff","#b2e6b2",
+          "#fac996","#ffd1e7","#d2eeff","#ffd2b3"
+        ];
+        const top = cList[params.dataIndex % cList.length];
+        return {
+          type: 'linear',
+          x: 0, y: 0, x2: 0, y2: 1,
+          colorStops: [
+            { offset: 0, color: top },
+            { offset: 1, color: "#f6fff4" }
+          ]
+        };
+      }
+    }
+  }]
+}, false, true);
+//End merge-in
+
+    }
+    buildSliders();
+    updateAll();
+  </script>
+</body>
+</html>
